@@ -198,7 +198,7 @@ const myInstance = new MyClass();
 console.log(myInstance.schema);
 
 /**
- * Outputs:
+ * Outputs this Realm schema:
  *
  * {
  *   name: 'MyClass',
@@ -216,6 +216,32 @@ console.log(myInstance.schema);
  *     setOfMyClass: 'MyClass<>',
  *     setOfStrings: 'string<>'
  *   }
+ * }
+ */
+
+console.log(myInstance);
+
+/**
+ * Outputs this, note that all the class members are now the underlying JS types:
+ *
+ * MyClass {
+ *   schema: {
+ *     ...
+ *   },
+ *   listOfMyClass: [],
+ *   listOfInts: [ 1, 2, 3 ],
+ *   int: 3,
+ *   float: 0,
+ *   double: 0,
+ *   string: '',
+ *   optionalString: '',
+ *   mixed: undefined,
+ *   dictionaryOfMyClasss: Map(0) {},
+ *   dictionaryOfMixed: Map(0) {},
+ *   setOfMyClasss: Set(0) {},
+ *   setOfStrings: Set(0) {},
+ *   nonRealmProperty: 0,
+ *   getZDouble: [Function (anonymous)]
  * }
  */
 

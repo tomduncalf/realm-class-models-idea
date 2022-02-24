@@ -175,9 +175,9 @@ class MyClass extends RealmObject {
   // even if it is really an instance of RealmTaggedMember at this point
   optionalString = RealmTypes.optional().string();
   mixed = RealmTypes.mixed();
-  dictionaryOfMyClasss = RealmTypes.dictionary(MyClass);
+  dictionaryOfMyClass = RealmTypes.dictionary(MyClass);
   dictionaryOfMixed = RealmTypes.dictionary(RealmTypes.mixed);
-  setOfMyClasss = RealmTypes.set(MyClass);
+  setOfMyClass = RealmTypes.set(MyClass);
   setOfStrings = RealmTypes.set(RealmTypes.string);
 
   // A property which is not persisted in Realm
@@ -188,7 +188,7 @@ class MyClass extends RealmObject {
     makeRealmObject(this);
   }
 
-  getZDouble = () => {
+  getDoubleInt = () => {
     return this.int * 2;
   };
 }
@@ -236,9 +236,9 @@ console.log(myInstance);
  *   string: '',
  *   optionalString: '',
  *   mixed: undefined,
- *   dictionaryOfMyClasss: Map(0) {},
+ *   dictionaryOfMyClass: Map(0) {},
  *   dictionaryOfMixed: Map(0) {},
- *   setOfMyClasss: Set(0) {},
+ *   setOfMyClass: Set(0) {},
  *   setOfStrings: Set(0) {},
  *   nonRealmProperty: 0,
  *   getZDouble: [Function (anonymous)]

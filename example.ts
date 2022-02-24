@@ -1,9 +1,13 @@
+import Realm from "realm";
+
 class RealmTaggedMember {
   constructor(public schemaType: string, public originalValue: any) {}
 }
 
 class RealmObject {
-  schema = {};
+  // schema: any = {};
+
+  static schema: any = {};
 }
 
 const getType = (type: any) => {
@@ -72,12 +76,14 @@ const RealmTypes = {
 };
 
 function makeRealmObject(_this: any) {
+  _this["schema"] = { name: _this.constructor.name, properties: {} };
+
   for (const key of Object.getOwnPropertyNames(_this)) {
     if (!(_this[key] instanceof RealmTaggedMember)) {
       continue;
     }
 
-    _this["schema"][key] = _this[key].schemaType;
+    _this["schema"]["properties"][key] = _this[key].schemaType;
     _this[key] = _this[key].originalValue;
   }
 }
@@ -92,8 +98,8 @@ class Thing extends RealmObject {
   mixed = RealmTypes.mixed();
   dictionaryOfThings = RealmTypes.dictionary(Thing);
   dictionaryOfMixed = RealmTypes.dictionary(RealmTypes.mixed);
-  setOfThings = RealmTypes.set(Thing);
-  setOfStrings = RealmTypes.set(RealmTypes.string);
+  // setOfThings = RealmTypes.set(Thing);
+  // setOfStrings = RealmTypes.set(RealmTypes.string);
 
   nonRealm = 0;
 
@@ -108,7 +114,29 @@ class Thing extends RealmObject {
   };
 }
 
-const x = new Thing();
+const realm = new Realm({ schema: [new Thing().schema] });
+
+for (let obj of realm.objects<Thing>("Thing")) {
+  console.log(obj.toJSON());
+  console.log(obj.string);
+  console.log(obj.listOfThings.length);
+}
+
+realm.write(() => {
+  realm.deleteAll();
+
+  const x = new Thing();
+  x.string = "I am x";
+  realm.create("Thing", x);
+
+  const y = new Thing();
+  y.string = "I am y";
+  y.int = 99;
+  realm.create("Thing", y);
+  // x.listOfThings.push(y);
+
+  console.log({ x, y });
+});
 // const y = new Thing();
 // x.listOfThings.push(y);
 // console.log(x);

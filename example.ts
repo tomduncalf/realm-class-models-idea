@@ -54,9 +54,9 @@ const getType = (type: any) => {
  * @param optional If true, returns a new factory with all types made optional
  * @returns
  */
-const RealmTypesFactory = (optional = false) => ({
+const RealmTypesFactory = <OtherT = never>(optional = false) => ({
   optional: () => {
-    return RealmTypesFactory(true);
+    return RealmTypesFactory<undefined>(true);
   },
 
   list: <T>(type: T, defaultValue: T[] = []) => {
@@ -64,53 +64,47 @@ const RealmTypesFactory = (optional = false) => ({
       `${getType(type)}[]`,
       optional,
       defaultValue
-    ) as any as Array<
-      T extends abstract new (...args: any) => any ? InstanceType<T> : T
-    >;
+    ) as any as
+      | Array<
+          T extends abstract new (...args: any) => any ? InstanceType<T> : T
+        >
+      | OtherT;
   },
 
   int: (defaultValue = 0) => {
-    return new RealmTaggedMember(
-      "int",
-      optional,
-      defaultValue
-    ) as any as number;
+    return new RealmTaggedMember("int", optional, defaultValue) as any as
+      | number
+      | OtherT;
   },
 
   float: (defaultValue = 0) => {
-    return new RealmTaggedMember(
-      "float",
-      optional,
-      defaultValue
-    ) as any as number;
+    return new RealmTaggedMember("float", optional, defaultValue) as any as
+      | number
+      | OtherT;
   },
 
   double: (defaultValue = 0) => {
-    return new RealmTaggedMember(
-      "double",
-      optional,
-      defaultValue
-    ) as any as number;
+    return new RealmTaggedMember("double", optional, defaultValue) as any as
+      | number
+      | OtherT;
   },
 
   string: (defaultValue = "") => {
-    return new RealmTaggedMember(
-      "string",
-      optional,
-      defaultValue
-    ) as any as string;
+    return new RealmTaggedMember("string", optional, defaultValue) as any as
+      | string
+      | OtherT;
   },
 
   bool: (defaultValue = false) => {
-    return new RealmTaggedMember(
-      "bool",
-      optional,
-      defaultValue
-    ) as any as boolean;
+    return new RealmTaggedMember("bool", optional, defaultValue) as any as
+      | boolean
+      | OtherT;
   },
 
   mixed: <T = unknown>(defaultValue = undefined) => {
-    return new RealmTaggedMember("mixed", optional, defaultValue) as any as T;
+    return new RealmTaggedMember("mixed", optional, defaultValue) as any as
+      | T
+      | OtherT;
   },
 
   // Really this should be a Realm.Dictionary not a JS Map
@@ -119,7 +113,7 @@ const RealmTypesFactory = (optional = false) => ({
       `${getType(valueType)}{}`,
       optional,
       defaultValue
-    ) as any as Map<string, T>;
+    ) as any as Map<string, T> | OtherT;
   },
 
   // Really this should be a Realm.Set not a JS Set
@@ -128,7 +122,7 @@ const RealmTypesFactory = (optional = false) => ({
       `${getType(type)}<>`,
       optional,
       defaultValue
-    ) as any as Set<T>;
+    ) as any as Set<T> | OtherT;
   },
 });
 
@@ -173,7 +167,7 @@ class MyClass extends RealmObject {
   // We can't chain this the other way (i.e. RealmTypes.string().optional()), which
   // might feel more natural, because we are claiming that `string()` returns a `string`,
   // even if it is really an instance of RealmTaggedMember at this point
-  optionalString? = RealmTypes.optional().string();
+  optionalString = RealmTypes.optional().string();
   mixed = RealmTypes.mixed();
   dictionaryOfMyClass = RealmTypes.dictionary(MyClass);
   dictionaryOfMixed = RealmTypes.dictionary(RealmTypes.mixed);

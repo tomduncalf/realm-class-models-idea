@@ -173,7 +173,7 @@ class MyClass extends RealmObject {
   // We can't chain this the other way (i.e. RealmTypes.string().optional()), which
   // might feel more natural, because we are claiming that `string()` returns a `string`,
   // even if it is really an instance of RealmTaggedMember at this point
-  optionalString = RealmTypes.optional().string();
+  optionalString? = RealmTypes.optional().string();
   mixed = RealmTypes.mixed();
   dictionaryOfMyClass = RealmTypes.dictionary(MyClass);
   dictionaryOfMixed = RealmTypes.dictionary(RealmTypes.mixed);

@@ -59,7 +59,7 @@ const RealmTypesFactory = (optional = false) => ({
     return RealmTypesFactory(true);
   },
 
-  array: <T>(type: T, defaultValue: T[] = []) => {
+  list: <T>(type: T, defaultValue: T[] = []) => {
     return new RealmTaggedMember(
       `${getType(type)}[]`,
       optional,
@@ -164,8 +164,8 @@ function makeRealmObject(_this: any) {
  * Example class with a variety of types
  */
 class MyClass extends RealmObject {
-  listOfMyClass = RealmTypes.array(MyClass);
-  listOfInts = RealmTypes.array(RealmTypes.int(), [1, 2, 3]);
+  listOfMyClass = RealmTypes.list(MyClass);
+  listOfInts = RealmTypes.list(RealmTypes.int(), [1, 2, 3]);
   int = RealmTypes.int(3);
   float = RealmTypes.float();
   double = RealmTypes.double();

@@ -31,10 +31,12 @@ class RealmObject {
  * e.g. if you pass in `MyClass`, it will return "MyClass". If you pass in
  * `RealmTypes.number()`, it will return "number"
  */
-const getType = (type: any) => {
+const getType = (type: any): string => {
   let typeName;
 
-  if (type.name) {
+  if (typeof type === "function") {
+    return getType(type());
+  } else if (type.name) {
     return type.name;
   } else if (type.__proto__ && type.__proto__.name) {
     return type.__proto__.name;
@@ -136,9 +138,13 @@ function makeRealmClass<T extends Record<string, any>>(
 ): {
   new (...args: any[]): {
     [P in keyof T]: T[P] extends () => infer R
-      ? InstanceType<R>
+      ? R extends abstract new (...args: any) => any
+        ? InstanceType<R>
+        : unknown
       : T[P] extends Array<() => infer R>
-      ? Array<InstanceType<R>>
+      ? R extends abstract new (...args: any) => any
+        ? Array<InstanceType<R>>
+        : unknown
       : T[P];
   };
   schema: any;
@@ -159,12 +165,17 @@ function makeRealmClass<T extends Record<string, any>>(
   } as any;
 }
 
+class OtherClass {
+  test: string = "";
+}
+
 /**
  * Example class with a variety of types
  */
 class MyClass extends makeRealmClass({
   // Can't reference MyClass at this point
   listOfMyClass: RealmTypes.list(() => MyClass),
+  listOfOtherClass: RealmTypes.list(OtherClass),
   listOfInts: RealmTypes.list(RealmTypes.int(), [1, 2, 3]),
   int: RealmTypes.int(3),
   float: RealmTypes.float(),
@@ -196,8 +207,9 @@ const myInstance = new MyClass();
 
 console.log(MyClass.schema);
 
-myInstance.listOfMyClass[0];
-myInstance.listOfInts[0];
+// myInstance.listOfMyClass[0];
+// myInstance.listOfOtherClass[0].test;
+// myInstance.listOfInts[0];
 
 /**
  * Outputs this Realm schema:

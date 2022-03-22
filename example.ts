@@ -35,7 +35,7 @@ const getType = (type: any): string => {
   let typeName;
 
   if (typeof type === "function") {
-    return getType(type());
+    return type.toString().split("() => ")[1];
   } else if (type.name) {
     return type.name;
   } else if (type.__proto__ && type.__proto__.name) {
@@ -134,6 +134,7 @@ const RealmTypesFactory = <OtherT = never>(optional = false) => ({
 const RealmTypes = RealmTypesFactory(false);
 
 function makeRealmClass<T extends Record<string, any>>(
+  name: string,
   properties: T
 ): {
   new (...args: any[]): {
@@ -149,13 +150,18 @@ function makeRealmClass<T extends Record<string, any>>(
   };
   schema: any;
 } {
-  const schema = Object.keys(properties).reduce((schemaObj, propertyKey) => {
-    schemaObj[propertyKey] = properties[propertyKey].schemaType;
-    return schemaObj;
-  }, {} as Record<string, string>);
+  const schema = Object.keys(properties).reduce(
+    (schemaObj, propertyKey) => {
+      schemaObj.properties[propertyKey] = properties[propertyKey].schemaType;
+      return schemaObj;
+    },
+    { properties: {} as Record<string, string>, name }
+  );
 
   return class {
     constructor() {
+      console.log(this.constructor.name);
+
       for (let [k, v] of Object.entries(properties)) {
         (this as any)[k] = v.originalValue;
       }
@@ -165,17 +171,16 @@ function makeRealmClass<T extends Record<string, any>>(
   } as any;
 }
 
-class OtherClass {
+class BaseClass {
   test: string = "";
 }
 
 /**
  * Example class with a variety of types
  */
-class MyClass extends makeRealmClass({
-  // Can't reference MyClass at this point
+class MyClass extends makeRealmClass("MyClass", {
   listOfMyClass: RealmTypes.list(() => MyClass),
-  listOfOtherClass: RealmTypes.list(OtherClass),
+  listOfOtherClass: RealmTypes.list(() => BaseClass),
   listOfInts: RealmTypes.list(RealmTypes.int(), [1, 2, 3]),
   int: RealmTypes.int(3),
   float: RealmTypes.float(),

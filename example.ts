@@ -133,7 +133,16 @@ const RealmTypes = RealmTypesFactory(false);
 
 function makeRealmClass<T extends Record<string, any>>(
   properties: T
-): { new (...args: any[]): T; schema: any } {
+): {
+  new (...args: any[]): {
+    [P in keyof T]: T[P] extends () => infer R
+      ? InstanceType<R>
+      : T[P] extends Array<() => infer R>
+      ? Array<InstanceType<R>>
+      : T[P];
+  };
+  schema: any;
+} {
   const schema = Object.keys(properties).reduce((schemaObj, propertyKey) => {
     schemaObj[propertyKey] = properties[propertyKey].schemaType;
     return schemaObj;
@@ -155,7 +164,7 @@ function makeRealmClass<T extends Record<string, any>>(
  */
 class MyClass extends makeRealmClass({
   // Can't reference MyClass at this point
-  // listOfMyClass: RealmTypes.list(???),
+  listOfMyClass: RealmTypes.list(() => MyClass),
   listOfInts: RealmTypes.list(RealmTypes.int(), [1, 2, 3]),
   int: RealmTypes.int(3),
   float: RealmTypes.float(),
@@ -186,6 +195,9 @@ class MyClass extends makeRealmClass({
 const myInstance = new MyClass();
 
 console.log(MyClass.schema);
+
+myInstance.listOfMyClass[0];
+myInstance.listOfInts[0];
 
 /**
  * Outputs this Realm schema:

@@ -59,13 +59,16 @@ const getType = (type: any): string => {
  * @returns
  */
 const RealmTypesFactory = <OtherT = never>(optional = false) => ({
+  // We can't chain this the other way (i.e. RealmTypes.string().optional()), which
+  // might feel more natural, because we are claiming that `string()` returns a `string`,
+  // even if it is really an instance of RealmTaggedMember at this point
   optional: () => {
     return RealmTypesFactory<undefined>(true);
   },
 
-  list: <T>(
+  list: <T extends Function>(
     type: T,
-    defaultValue: (T extends () => any ? ReturnType<T> : T)[] = []
+    defaultValue: (T extends () => any ? ReturnType<T> : never)[] = []
   ) => {
     return new RealmTaggedMember(
       `${getType(type)}[]`,
@@ -114,22 +117,31 @@ const RealmTypesFactory = <OtherT = never>(optional = false) => ({
       | OtherT;
   },
 
-  // Really this should be a Realm.Dictionary not a JS Map
-  dictionary: <T>(valueType: T, defaultValue = new Map<string, T>()) => {
+  dictionary: <T extends Function>(
+    valueType: T,
+    defaultValue = {} as Record<
+      string,
+      T extends () => any ? ReturnType<T> : never
+    >
+  ) => {
     return new RealmTaggedMember(
       `${getType(valueType)}{}`,
       optional,
       defaultValue
-    ) as any as Map<string, T> | OtherT;
+    ) as any as Realm.Dictionary<T> | OtherT;
   },
 
   // Really this should be a Realm.Set not a JS Set
-  set: <T>(type: T, defaultValue = new Set<T>()) => {
+  set: <T extends Function>(
+    type: T
+    // defaultValue = new Set<T extends () => any ? ReturnType<T> : never>()
+  ) => {
     return new RealmTaggedMember(
       `${getType(type)}<>`,
       optional,
-      defaultValue
-    ) as any as Set<T> | OtherT;
+      undefined
+      // defaultValue
+    ) as any as Realm.Set<T> | OtherT;
   },
 });
 
@@ -143,6 +155,7 @@ export function makeRealmClass<T extends Record<string, any>>(
   properties: T
 ): {
   new (...args: any[]): {
+    // TODO can this be made nicer?
     [P in keyof T]: T[P] extends () => infer R
       ? R extends abstract new (...args: any) => any
         ? InstanceType<R>
@@ -150,6 +163,14 @@ export function makeRealmClass<T extends Record<string, any>>(
       : T[P] extends Array<() => infer R>
       ? R extends abstract new (...args: any) => any
         ? Array<InstanceType<R>>
+        : unknown
+      : T[P] extends Realm.Dictionary<() => infer R>
+      ? R extends abstract new (...args: any) => any
+        ? Realm.Dictionary<InstanceType<R>>
+        : unknown
+      : T[P] extends Realm.Set<() => infer R>
+      ? R extends abstract new (...args: any) => any
+        ? Realm.Set<InstanceType<R>>
         : unknown
       : T[P];
   };

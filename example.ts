@@ -12,9 +12,6 @@ class MyClass extends makeRealmClass("MyClass", {
   float: RealmTypes.float(),
   double: RealmTypes.double(),
   string: RealmTypes.string(),
-  // We can't chain this the other way (i.e. RealmTypes.string().optional()), which
-  // might feel more natural, because we are claiming that `string()` returns a `string`,
-  // even if it is really an instance of RealmTaggedMember at this point
   optionalString: RealmTypes.optional().string(),
   mixed: RealmTypes.mixed(),
   dictionaryOfMyClass: RealmTypes.dictionary(() => MyClass),
@@ -22,13 +19,10 @@ class MyClass extends makeRealmClass("MyClass", {
   setOfMyClass: RealmTypes.set(() => MyClass),
   setOfStrings: RealmTypes.set(() => RealmTypes.string()),
 }) {
-  // A property which is not persisted in Realm
+  // A member which is not persisted in Realm
   nonRealmProperty = 0;
 
-  constructor() {
-    super();
-  }
-
+  // An instance method
   getDoubleInt = () => {
     return this.int * 2;
   };
@@ -39,6 +33,11 @@ class OtherClass extends makeRealmClass("OtherClass", {
 }) {}
 
 const myInstance = new MyClass();
+
+// These all have the expected types
+myInstance.listOfMyClass;
+myInstance.dictionaryOfMyClass;
+myInstance.setOfMyClass;
 
 console.log(MyClass.schema);
 

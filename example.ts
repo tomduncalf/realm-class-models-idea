@@ -7,16 +7,16 @@ import { makeRealmClass, RealmTypes } from "./realm";
 class MyClass extends makeRealmClass("MyClass", {
   listOfInts: RealmTypes.list(() => RealmTypes.int(), [1, 2, 3]),
   listOfMyClass: RealmTypes.optional().list(() => MyClass),
-  // listOfOtherClass: RealmTypes.optional().list(() => OtherClass),
+  listOfOtherClass: RealmTypes.optional().list(() => OtherClass),
   int: RealmTypes.int(3),
   float: RealmTypes.float(),
   double: RealmTypes.double(),
   string: RealmTypes.string(),
   mixed: RealmTypes.mixed<number | string>(),
-  // dictionaryOfMyClass: RealmTypes.optional().dictionary(() => MyClass),
-  // dictionaryOfMixed: RealmTypes.optional().dictionary(() => RealmTypes.mixed()),
-  // setOfMyClass: RealmTypes.optional().set(() => MyClass),
-  // setOfStrings: RealmTypes.optional().set(() => RealmTypes.string()),
+  dictionaryOfMyClass: RealmTypes.optional().dictionary(() => MyClass),
+  dictionaryOfMixed: RealmTypes.optional().dictionary(() => RealmTypes.mixed()),
+  setOfMyClass: RealmTypes.optional().set(() => MyClass),
+  setOfStrings: RealmTypes.optional().set(() => RealmTypes.string()),
 }) {
   getDoubleInt = () => {
     return this.int * 2;

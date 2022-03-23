@@ -159,19 +159,31 @@ export function makeRealmClass<T extends Record<string, any>>(
     [P in keyof T]: T[P] extends () => infer R
       ? R extends abstract new (...args: any) => any
         ? InstanceType<R>
-        : unknown
+        : R
       : T[P] extends Array<() => infer R>
       ? R extends abstract new (...args: any) => any
         ? Array<InstanceType<R>>
-        : unknown
+        : Array<R>
+      : T[P] extends Array<() => infer R> | undefined
+      ? R extends abstract new (...args: any) => any
+        ? Array<InstanceType<R>> | undefined
+        : Array<R> | undefined
       : T[P] extends Realm.Dictionary<() => infer R>
       ? R extends abstract new (...args: any) => any
         ? Realm.Dictionary<InstanceType<R>>
-        : unknown
+        : Realm.Dictionary<R>
+      : T[P] extends Realm.Dictionary<() => infer R> | undefined
+      ? R extends abstract new (...args: any) => any
+        ? Realm.Dictionary<InstanceType<R>> | undefined
+        : Realm.Dictionary<R> | undefined
       : T[P] extends Realm.Set<() => infer R>
       ? R extends abstract new (...args: any) => any
         ? Realm.Set<InstanceType<R>>
-        : unknown
+        : Realm.Set<R>
+      : T[P] extends Realm.Set<() => infer R> | undefined
+      ? R extends abstract new (...args: any) => any
+        ? Realm.Set<InstanceType<R>> | undefined
+        : Realm.Set<R> | undefined
       : T[P];
   };
   schema: any;

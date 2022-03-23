@@ -154,7 +154,7 @@ export function makeRealmClass<T extends Record<string, any>>(
   name: string,
   properties: T
 ): {
-  new (...args: any[]): {
+  new (...args: any[]): Realm.Object & {
     // TODO can this be made nicer?
     [P in keyof T]: T[P] extends () => infer R
       ? R extends abstract new (...args: any) => any

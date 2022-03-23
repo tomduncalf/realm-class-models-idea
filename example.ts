@@ -5,24 +5,19 @@ import { makeRealmClass, RealmTypes } from "./realm";
  * Example class with a variety of types
  */
 class MyClass extends makeRealmClass("MyClass", {
-  listOfMyClass: RealmTypes.list(() => MyClass),
-  listOfOtherClass: RealmTypes.list(() => OtherClass),
   listOfInts: RealmTypes.list(() => RealmTypes.int(), [1, 2, 3]),
+  listOfMyClass: RealmTypes.optional().list(() => MyClass),
+  // listOfOtherClass: RealmTypes.optional().list(() => OtherClass),
   int: RealmTypes.int(3),
   float: RealmTypes.float(),
   double: RealmTypes.double(),
   string: RealmTypes.string(),
-  optionalString: RealmTypes.optional().string(),
-  mixed: RealmTypes.mixed(),
-  dictionaryOfMyClass: RealmTypes.dictionary(() => MyClass),
-  dictionaryOfMixed: RealmTypes.dictionary(() => RealmTypes.mixed()),
-  setOfMyClass: RealmTypes.set(() => MyClass),
-  setOfStrings: RealmTypes.set(() => RealmTypes.string()),
+  mixed: RealmTypes.mixed<number | string>(),
+  // dictionaryOfMyClass: RealmTypes.optional().dictionary(() => MyClass),
+  // dictionaryOfMixed: RealmTypes.optional().dictionary(() => RealmTypes.mixed()),
+  // setOfMyClass: RealmTypes.optional().set(() => MyClass),
+  // setOfStrings: RealmTypes.optional().set(() => RealmTypes.string()),
 }) {
-  // A member which is not persisted in Realm
-  nonRealmProperty = 0;
-
-  // An instance method
   getDoubleInt = () => {
     return this.int * 2;
   };
@@ -35,6 +30,7 @@ class OtherClass extends makeRealmClass("OtherClass", {
 const myInstance = new MyClass();
 
 // These all have the expected types
+myInstance.listOfInts;
 myInstance.listOfMyClass;
 myInstance.dictionaryOfMyClass;
 myInstance.setOfMyClass;
@@ -87,6 +83,13 @@ console.log(myInstance);
 const realm = new Realm({ schema: [MyClass, OtherClass] });
 realm.write(() => {
   // TODO weird type issue
-  const myInstance = realm.create(MyClass as any, {});
-  const otherInstance = realm.create(OtherClass as any, {});
+  const myInstance = realm.create(MyClass, {
+    listOfInts: [1, 2, 3],
+    int: 1,
+    float: 1,
+    double: 1,
+    string: "1",
+    mixed: "1",
+  });
+  const otherInstance = realm.create(OtherClass, {});
 });
